@@ -156,33 +156,8 @@ public class ChatActivity extends AppCompatActivity {
 
                 messageET.setText("");
                 displayMessage(chatMessage);
+                new Connection().execute(messageText);
 
-                String conversationTokenInfo = startConversation();
-                JSONObject jsonObject = null;
-
-                if(conversationTokenInfo != "") {
-                    try {
-                        jsonObject = new JSONObject(conversationTokenInfo);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                //send message to bot and get the response using the api conversations/{conversationid}/activities
-                if(jsonObject != null) {
-                    try {
-                        conversationId = jsonObject.get("conversationId").toString();
-                        localToken = jsonObject.get("token").toString();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if(conversationId != "") {
-                    sendMessageToBot(messageText);
-                }
-
-            }
         });
     }
 
@@ -448,6 +423,40 @@ public class ChatActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+                                   
+    private class Connection extends AsyncTask<String,Integer,String> {
+
+        @Override
+        protected String doInBackground(String... arg0) {
+            String conversationTokenInfo = startConversation();
+            JSONObject jsonObject = null;
+
+            if(conversationTokenInfo != "") {
+                try {
+                    jsonObject = new JSONObject(conversationTokenInfo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //send message to bot and get the response using the api conversations/{conversationid}/activities
+            if(jsonObject != null) {
+                try {
+                    conversationId = jsonObject.get("conversationId").toString();
+                    localToken = jsonObject.get("token").toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(conversationId != "") {
+                sendMessageToBot(arg0[0]);
+            }
+
+            return null;
+        }
+
     }
 }
 
